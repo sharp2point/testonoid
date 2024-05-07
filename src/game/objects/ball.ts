@@ -1,9 +1,8 @@
 import {
-    Color4,
-    HavokPlugin, IPhysicsCollisionEvent, LinesMesh, Material, Mesh, MeshBuilder, Observable, Observer, PhysicsAggregate,
+    HavokPlugin, IBasePhysicsCollisionEvent, IPhysicsCollisionEvent,
+    Material, Mesh, MeshBuilder, Observable, Observer, PhysicsAggregate,
     PhysicsMotionType, PhysicsShapeType,
-    Quaternion,
-    Scene, setAndStartTimer, Tools, Vector3
+    Quaternion, setAndStartTimer, Tools, Vector3
 } from "@babylonjs/core";
 import type { Shield } from "./shield";
 import { collideMask, GAME, GAMESIGNALS } from "../../state/global";
@@ -21,7 +20,7 @@ export class Ball {
         restitution: 1
     }
     private speedLimits = {
-        max: 50,
+        max: 40,
         min: 20,
     }
     private initPosition = new Vector3(0, 0.35, -5.5);
@@ -128,20 +127,18 @@ export class Ball {
 
         this.collideObservable.add((e) => {
             const collideAgainst = e.collidedAgainst.transformNode;
-            if (collideAgainst.name.includes('enemy')) {
-                if (GAME.enemiesMap?.get(collideAgainst.name)) {
-                    const enemyDate = GAME.enemiesMap?.get(collideAgainst.name)?.collideReaction();
-                    collideEnemyCallback(enemyDate);
-                }
-            } else if (collideAgainst.name.includes('wall')) {
+            if (collideAgainst.name.includes('wall')) {
                 this.fixZeroBounceAngle();
             }
         });
 
         this.collideEndObservable.add((e) => {
             const collideAgainst = e.collidedAgainst.transformNode;
-            if (collideAgainst.name.includes('wall')) {
-                //this.debugPhysicsBug();
+            if (collideAgainst.name.includes('enemy')) {
+                if (GAME.enemiesMap?.get(collideAgainst.name)) {
+                    const enemyDate = GAME.enemiesMap?.get(collideAgainst.name)?.collideReaction();
+                    collideEnemyCallback(enemyDate);
+                }
             }
         });
     }
@@ -178,7 +175,7 @@ export class Ball {
     //     const pos = this.mesh.getAbsolutePosition();
     //     const reflectForward = Vector3.Reflect(lin, Vector3.Forward());
     //     //---------------------------------------------------------------
-        
+
     //     const angle = Vector3.GetAngleBetweenVectors(lin, reflectForward, Vector3.Up());
     //     //const arr = [pos, pos.add(lin)]
     //     // if (!this.liinVelForwardLine) {

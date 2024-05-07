@@ -1,8 +1,9 @@
-import type{ GameScene } from "@/game/game_scene";
-import type{ Enemy } from "@/game/objects/enemy";
+import type { GameScene } from "@/game/game_scene";
+import type { Enemy } from "@/game/objects/enemy";
 import type { Engine, HavokPlugin, Scene, UniversalCamera, Vector3 } from "@babylonjs/core";
 import type GameMenu from "@/game/components/menu";
 import type GameApp from "@/game/components/game";
+import { ComboFutures } from "@/game/futures/combo";
 
 
 export type GameState = {
@@ -28,6 +29,7 @@ export type GameState = {
     gameBox: { width: number, height: number },
     gameState: number,
     enemiesMap: Map<string, Enemy>,
+    comboFutures: ComboFutures,
 }
 
 export type UserState = {

@@ -19,6 +19,7 @@ import { EnemyGenerator } from "./enemy_generator";
 import type { Enemy } from "./objects/enemy";
 import NotifyComponent from "./components/notify";
 import { DEBUG } from "@/state/debug";
+import { ComboFutures } from "./futures/combo";
 
 export class GameScene {
     private scene: Scene;
@@ -63,9 +64,10 @@ export class GameScene {
 
         initBaseMeshes(this.scene);
         //new LevelBuilder(user_state.level, this.scene, this.winCallback);
-        
-        this.enemyGenerator = new EnemyGenerator(this.scene, 10); 
-        
+
+        this.enemyGenerator = new EnemyGenerator(this.scene, 10);
+
+        GAME.comboFutures = new ComboFutures(this.comboCallback);
 
         this.addSceneGameEvents();
 
@@ -293,6 +295,11 @@ export class GameScene {
     }
     collideEnemyCallback(enemyData: EnemyData) {
         GAME.GameApp.Scoreboard.Score = `${enemyData.type}`;
+        GAME.comboFutures.initCombo(enemyData.type);
+    }
+    comboCallback(comboType: number) {
+        console.log("Combo: ", comboType)
+        GAME.GameApp.Scoreboard.Combo = `${comboType}`;
     }
     dispose() {
         this.shield.dispose();

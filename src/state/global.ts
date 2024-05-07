@@ -1,5 +1,6 @@
 import type { Enemy } from "@/game/objects/enemy";
 import type { GameState, UserState } from "../types/game_types";
+import { ComboFutures } from "@/game/futures/combo";
 
 export const GAMESIGNALS = {
     MENU: 1,
@@ -31,6 +32,7 @@ export const GAME: GameState = {
     gameBox: { width: 18, height: 25 },
     gameState: GAMESIGNALS.MENU,
     enemiesMap: new Map<string, Enemy>(),
+    comboFutures: null,
 };
 
 export const collideMask = {
@@ -64,5 +66,10 @@ export const ENEMYTYPES = {
     GREEN: 1,
     BLUE: 2,
     RED: 3,
+}
+export const COMBOTYPES = {
+    THREE_EQ_SEQ_RED: 1,
+    THREE_EQ_SEQ_GREEN: 11,
+    THREE_EQ_SEQ_BLUE: 12,
 }
 

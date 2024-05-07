@@ -4,7 +4,7 @@ import { initCore } from "../init";
 import { UserState } from "@/types/game_types";
 import CameraControl from "@/debug/component/camera_control/cameraControl";
 import { HavokPlugin, Scene, Tools } from "@babylonjs/core";
-import PointsComponent from "./points";
+import ScoreboardComponent from "./scoreboard";
 import { Enemy } from "../objects/enemy";
 import { DEBUG } from "@/state/debug";
 
@@ -13,7 +13,7 @@ export default class GameComponent extends HTMLElement {
     private canvas: HTMLCanvasElement;
     private menu: HTMLElement;
     onMenuEvent: CustomEvent;
-    private scoreboard: PointsComponent;
+    private scoreboard: ScoreboardComponent;
 
     get Scoreboard() {
         return this.scoreboard;
@@ -23,7 +23,7 @@ export default class GameComponent extends HTMLElement {
         super();
         this.root = this.attachShadow({ mode: 'open' });
         this.root.innerHTML = template();
-        new PointsComponent();
+        new ScoreboardComponent();
     }
     connectedCallback() {
         this.scoreboard = this.root.querySelector(".scoreboard");
@@ -123,7 +123,7 @@ function template() {
             <button class="menu-button" data-target="loose">LOOSE</button>
             <button class="menu-button" data-target="debug">Debug</button>
         </nav>
-        <nice2jam-points-component class="scoreboard"></nice2jam-points-component>
+        <nice2jam-scoreboard-component class="scoreboard"></nice2jam-scoreboard-component>
     `;
     const css = `
         <style>
@@ -161,9 +161,6 @@ function template() {
             top:0;
             left:calc(100%/2 - 100px);
             z-index:2;
-            border:1px solid white;
-            background:rgba(100,100,100,0.8);
-            font:2rem bold, Impact;
         }
         </style>
     `;

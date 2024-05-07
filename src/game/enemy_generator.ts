@@ -6,6 +6,9 @@ export class EnemyGenerator {
     private scene: Scene;
     private enemyCount = 0;
     private isRun = true;
+    private inOptions = {
+        oldEnemyPosition: new Vector3(),
+    }
 
     get EnemyCounts() {
         return this.enemyCount
@@ -19,8 +22,16 @@ export class EnemyGenerator {
     generateEnemy() {
         const rnd = Math.floor(Math.random() * 10000);
         const name = `enemy-${rnd}`;
-        const enemy = new Enemy( {name:name, 
-            position: new Vector3(Math.floor(Scalar.RandomRange(-GAME.gameBox.width / 2 + 1, GAME.gameBox.width / 2 - 1)), 0.55, GAME.gameBox.height/2-1),
+        let position: Vector3;
+        while (true) {
+            position = new Vector3(Math.floor(Scalar.RandomRange(-GAME.gameBox.width / 2 + 1, GAME.gameBox.width / 2 - 1)), 0.55, GAME.gameBox.height / 2 - 1)
+            if (position.x !== this.inOptions.oldEnemyPosition.x) {
+                break;
+            }
+        }
+        const enemy = new Enemy({
+            name: name,
+            position: position,
             type: this.randomEnemyType()
         }, this.scene);
         GAME.enemiesMap.set(name, enemy);
@@ -29,7 +40,7 @@ export class EnemyGenerator {
             this.stop();
         }
     }
-    start(callback: (count:number) => void) {
+    start(callback: (count: number) => void) {
         setAndStartTimer({
             timeout: 1000,
             contextObservable: this.scene.onBeforeRenderObservable,
