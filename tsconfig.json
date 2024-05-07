@@ -1,0 +1,38 @@
+{
+  // Some typical compiler options
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "esnext",
+    //"strict": true,
+    "experimentalDecorators": true,
+    // "isolatedModules": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "sourceMap": true,
+    "baseUrl": ".",
+    "types": [      
+      ""
+    ],
+    "paths": {
+      "@/*": [
+        "src/*",
+        "styles/*"
+      ]
+    },
+    "lib": [
+      "esnext",
+      "dom",
+      "dom.iterable",
+      "scripthost"
+    ]
+  },
+   "include": [
+    "src/**/*.ts",
+    "tests/**/*.ts",
+    "types.d.ts",
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
