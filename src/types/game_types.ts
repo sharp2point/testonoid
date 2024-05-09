@@ -36,10 +36,22 @@ export type UserState = {
     name: string,
     id: string,
     level: number,
-    points: number,
+    scores: number,
 }
 export type EnemyData = {
     name: string,
     type: number,
     position: Vector3
+}
+export type ComboDescription = {
+    header: string,
+    description: string,
+    settings: {
+        color: string,
+    }
+}
+export type CameraDebugControl = {
+    position: Vector3,
+    target: Vector3,
+    fov: number,
 }

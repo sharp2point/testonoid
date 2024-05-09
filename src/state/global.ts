@@ -60,16 +60,48 @@ export const USER: UserState = {
     name: '',
     id: '',
     level: 1,
-    points: 0,
+    scores: 0,
 }
 export const ENEMYTYPES = {
-    GREEN: 1,
-    BLUE: 2,
-    RED: 3,
+    GREEN: {
+        type: 1,
+        score:5,
+    },
+    BLUE: {
+        type: 2,
+        score: 10,
+    },
+    RED: {
+        type: 3,
+        score: 15,
+    },
 }
 export const COMBOTYPES = {
     THREE_EQ_SEQ_RED: 1,
     THREE_EQ_SEQ_GREEN: 11,
     THREE_EQ_SEQ_BLUE: 12,
+}
+export const COMBODESCRIPTION = {
+    THREE_EQ_SEQ_RED: {
+        header: "Red Combo",
+        description: "Get Red Bonus!",
+        settings: {
+            color:"#a30202",
+        }
+    },
+    THREE_EQ_SEQ_GREEN: {
+        header: "Green Combo",
+        description: "Get Green Bonus!",
+        settings: {
+            color: "#068f23",
+        }
+    },
+    THREE_EQ_SEQ_BLUE: {
+        header: "BLUE Combo",
+        description: "Get Blue Bonus!",
+        settings: {
+            color: "#053f82",
+        }
+    }
 }
 

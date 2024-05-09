@@ -24,7 +24,10 @@ export class EnemyGenerator {
         const name = `enemy-${rnd}`;
         let position: Vector3;
         while (true) {
-            position = new Vector3(Math.floor(Scalar.RandomRange(-GAME.gameBox.width / 2 + 1, GAME.gameBox.width / 2 - 1)), 0.55, GAME.gameBox.height / 2 - 1)
+            position = new Vector3(
+                Math.floor(Scalar.RandomRange(-GAME.gameBox.width / 2 + 1, GAME.gameBox.width / 2 - 1)),
+                0.55,
+                GAME.gameBox.height / 2 - 1);
             if (position.x !== this.inOptions.oldEnemyPosition.x) {
                 break;
             }

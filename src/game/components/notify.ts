@@ -21,7 +21,7 @@ export default class NotifyComponent extends HTMLElement {
         })
     }
     disconnectedCallback() {
-        console.log("Notify dispose");
+        
     }
 }
 

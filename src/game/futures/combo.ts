@@ -19,16 +19,13 @@ export class ComboFutures {
             if (this.threeEqualsSequence.type === enemyType) {
                 this.threeEqualsSequence.count += 1;
                 if (this.threeEqualsSequence.count === 3) {
-                    console.log(this.threeEqualsSequence)
                     callbackCombo.call(this, this.threeEqualsSequence.type);
-                    // clearCombo.call(this, null);
                     this.threeEqualsSequence = {
                         type: 0,
                         count: 0
                     };
                 }
             } else {
-                // clearCombo.call(this, null);
                 this.threeEqualsSequence = {
                     type: 0,
                     count: 0
@@ -40,25 +37,19 @@ export class ComboFutures {
         }
         function callbackCombo(selector: number) {
             switch (selector) {
-                case ENEMYTYPES.RED: {
+                case ENEMYTYPES.RED.type: {
                     this.comboThreeEqualSequenceCallback(COMBOTYPES.THREE_EQ_SEQ_RED);
                     break;
                 }
-                case ENEMYTYPES.GREEN: {
+                case ENEMYTYPES.GREEN.type: {
                     this.comboThreeEqualSequenceCallback(COMBOTYPES.THREE_EQ_SEQ_GREEN);
                     break;
                 }
-                case ENEMYTYPES.BLUE: {
+                case ENEMYTYPES.BLUE.type: {
                     this.comboThreeEqualSequenceCallback(COMBOTYPES.THREE_EQ_SEQ_BLUE);
                     break;
                 }
             }
-        }
-        function clearCombo() {
-            this.threeEqualsSequence = {
-                type: 0,
-                count: 0
-            };
         }
     }
 }

@@ -128,7 +128,7 @@ export class Ball {
         this.collideObservable.add((e) => {
             const collideAgainst = e.collidedAgainst.transformNode;
             if (collideAgainst.name.includes('wall')) {
-                this.fixZeroBounceAngle();
+                this.fixZeroBounceAngle(); // менять угол при угле падения меньше 5 градусов
             }
         });
 
@@ -137,7 +137,7 @@ export class Ball {
             if (collideAgainst.name.includes('enemy')) {
                 if (GAME.enemiesMap?.get(collideAgainst.name)) {
                     const enemyDate = GAME.enemiesMap?.get(collideAgainst.name)?.collideReaction();
-                    collideEnemyCallback(enemyDate);
+                    collideEnemyCallback(enemyDate);// уведомить сцену о столкновении с Enemy
                 }
             }
         });

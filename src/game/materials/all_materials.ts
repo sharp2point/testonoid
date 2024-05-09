@@ -1,6 +1,6 @@
 import { Color3, Material, StandardMaterial, type Scene } from "@babylonjs/core";
 
-export function initAllMaterials(scene: Scene):Map<string,Material> {
+export function initAllMaterials(scene: Scene): Map<string, Material> {
     const groundMaterial = new StandardMaterial(`ground-mt`, scene);
     groundMaterial.diffuseColor = Color3.FromHexString("#fefade");
     groundMaterial.maxSimultaneousLights = 10;
@@ -19,7 +19,11 @@ export function initAllMaterials(scene: Scene):Map<string,Material> {
 
     const enemyMaterial = new StandardMaterial("enemy-mt", this.scene);
     enemyMaterial.diffuseColor = new Color3(1, 0, 0);
-    enemyMaterial.alpha = 0.5;
+    enemyMaterial.alpha = 1;
+
+    const enemyDeathTorusMaterial = new StandardMaterial("enemy-death-torus-mt", this.scene);
+    enemyDeathTorusMaterial.diffuseColor = new Color3(0.2, 0.2, 0.2);
+    enemyDeathTorusMaterial.alpha = 1;
     //-----------------------------------------------------
     const materialsMap = new Map();
     materialsMap.set('groundMaterial', groundMaterial);
@@ -27,6 +31,7 @@ export function initAllMaterials(scene: Scene):Map<string,Material> {
     materialsMap.set('wallMaterial', wallMaterial);
     materialsMap.set('ballMaterial', ballMaterial);
     materialsMap.set('enemyMaterial', enemyMaterial);
+    materialsMap.set('enemyDeathTorusMaterial', enemyDeathTorusMaterial);
     return materialsMap;
 }
 

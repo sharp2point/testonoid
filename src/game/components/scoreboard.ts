@@ -7,18 +7,22 @@ export default class ScoreboardComponent extends HTMLElement {
     set Score(val: string) {
         this.score.innerText = val;
     }
+    
     set Combo(val: string) {
         this.combo.innerText = val;
     }
 
-    constructor() {
+    constructor(score:number) {
         super();
         this.root = this.attachShadow({ mode: 'open' });
-        this.root.innerHTML = template();
+        this.root.innerHTML = template(score);
     }
     connectedCallback() {
         this.score = this.root.querySelector("#score");
         this.combo = this.root.querySelector("#combo");
+    }
+    addScore(val: number) {
+        this.score.innerText = `${parseInt(this.score.innerText)+val}`;
     }
 }
 
@@ -26,11 +30,11 @@ if (!customElements.get('nice2jam-scoreboard-component')) {
     customElements.define('nice2jam-scoreboard-component', ScoreboardComponent);
 }
 
-function template() {
+function template(score:number) {
     const html = `
     <div class="place points-place">
         <h1>Points: </h1>
-        <span id="score">1000</span>
+        <span id="score">${score}</span>
     </div>
     <div class="place combo-place">
         <h1>Combo: </h1>

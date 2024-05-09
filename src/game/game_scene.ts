@@ -1,8 +1,8 @@
 import {
-    Color3, Color4, DirectionalLight, Engine, HavokPlugin, HemisphericLight,
+    Color3, Color4, Constants, DirectionalLight, Engine, HavokPlugin, HemisphericLight,
     Material,
-    Mesh, MeshBuilder, PhysicsAggregate, PhysicsMotionType, PhysicsShapeType,
-    Scene, ShadowGenerator, StandardMaterial, Tools, TransformNode,
+    Mesh, MeshBuilder, ParticleSystem, PhysicsAggregate, PhysicsMotionType, PhysicsShapeType,
+    Scene, ShaderLanguage, ShaderMaterial, ShadowGenerator, StandardMaterial, Texture, TextureSampler, Tools, TransformNode,
     UniversalCamera, Vector3,
     type IShadowLight
 } from "@babylonjs/core";
@@ -13,13 +13,17 @@ import { Shield } from "./objects/shield";
 import { initAllMaterials } from "./materials/all_materials";
 import { LevelBuilder } from "./level_builder";
 import { initBaseMeshes } from "./meshes/base_meshes";
-import { collideMask, GAME, GAMESIGNALS } from "../state/global";
+import { collideMask, COMBODESCRIPTION, COMBOTYPES, ENEMYTYPES, GAME, GAMESIGNALS, USER } from "../state/global";
 import type { EnemyData, GameState, UserState } from "../types/game_types";
 import { EnemyGenerator } from "./enemy_generator";
 import type { Enemy } from "./objects/enemy";
 import NotifyComponent from "./components/notify";
 import { DEBUG } from "@/state/debug";
 import { ComboFutures } from "./futures/combo";
+import FlashNotifyConmponent from "./components/flash_notify";
+import { loadFX } from "./fx/shaders";
+import { enemyDeathShader } from "./fx/enemy_death_shader";
+import { initAllPArticles } from "./materials/all_particles";
 
 export class GameScene {
     private scene: Scene;
@@ -27,6 +31,7 @@ export class GameScene {
     private ball: Ball | null = null;
     private shield: Shield | null = null;
     private allMaterials: Map<string, Material>;
+    private allParticles: Map<string, ParticleSystem>;
     private enemyGenerator: EnemyGenerator;
 
     get gameScene() {
@@ -34,6 +39,9 @@ export class GameScene {
     }
     get materials() {
         return this.allMaterials;
+    }
+    get particles() {
+        return this.allParticles;
     }
 
     constructor(game_state: GameState, user_state: UserState) {
@@ -53,6 +61,10 @@ export class GameScene {
         const sceneLight = this.addLight(this.scene);
 
         this.allMaterials = initAllMaterials(this.scene);
+        this.allParticles = initAllPArticles(this.scene);
+        // loadFX();
+        // const shaderMaterial = this.initShaderMaterial();
+        // enemyDeathShader();
         this.createWorld(this.scene);
         this.dragBoxLines();
 
@@ -71,7 +83,12 @@ export class GameScene {
 
         this.addSceneGameEvents();
 
+        let time = 0;
         this.scene.onBeforeRenderObservable.add(() => {
+            // shaderMaterial.setFloat("time", time);
+            // time += 0.02;
+
+            // shaderMaterial.setVector3("cameraPosition", GAME.Scene.activeCamera.position);
             if (this.ball && this.shield) {
                 if (!this.ball.isRun) {
                     this.ball.ballJoinShield(this.shield);
@@ -82,6 +99,13 @@ export class GameScene {
             switch (info.event.key) {
                 case "w": {
                     this.ball!.run();
+                    break;
+                }
+                case "b": {
+                    const flashNotify = new FlashNotifyConmponent(
+                        COMBODESCRIPTION.THREE_EQ_SEQ_RED,
+                        GAME.PlaceGame,
+                        { timeLive: 2500, timeout: 1.5 });
                     break;
                 }
             }
@@ -211,6 +235,7 @@ export class GameScene {
         walls.receiveShadows = true;
 
         ground.material = this.allMaterials.get('groundMaterial') as StandardMaterial;
+        // ground.material = GAME.Scene.getMaterialByName("shader") as ShaderMaterial;
         roof.material = this.allMaterials.get('roofMaterial') as StandardMaterial;
         roof2.material = this.allMaterials.get('roofMaterial') as StandardMaterial;
         walls.material = this.allMaterials.get('wallMaterial') as StandardMaterial;
@@ -275,6 +300,39 @@ export class GameScene {
     winCallback() {
         GAME.gameState = GAMESIGNALS.GAMEWIN;
     }
+    initShaderMaterial() {
+        const shaderMaterial = new ShaderMaterial("shader", GAME.Scene, {
+            vertex: "custom",
+            fragment: "custom",
+        },
+            {
+                attributes: ["position", "normal", "uv"],
+                uniforms: ["world", "worldView", "worldViewProjection", "view", "projection"],
+                uniformBuffers: GAME.Engine.isWebGPU ? ["Scene", "Mesh"] : undefined,
+                shaderLanguage: GAME.Engine.isWebGPU ? ShaderLanguage.WGSL : ShaderLanguage.GLSL
+            }
+        );
+        const refTexture = new Texture("./public/images/ref.jpg", GAME.Scene);
+        refTexture.wrapU = Texture.CLAMP_ADDRESSMODE;
+        refTexture.wrapV = Texture.CLAMP_ADDRESSMODE;
+
+        const mainTexture = new Texture("./public/images/amiga.jpg", GAME.Scene);
+
+        shaderMaterial.setTexture("refSampler", refTexture);
+        shaderMaterial.setTexture("textureSampler", mainTexture);
+
+        // if (GAME.Engine.isWebGPU) {
+        //     shaderMaterial.setTexture("diffuse", mainTexture);
+        //     const sampler = new TextureSampler();
+        //     sampler.setParameters(); // use the default values
+        //     sampler.samplingMode = Constants.TEXTURE_NEAREST_SAMPLINGMODE;
+        //     shaderMaterial.setTextureSampler("mySampler", refTexture);
+        // }
+        shaderMaterial.setFloat("time", 0);
+        shaderMaterial.setVector3("cameraPosition", Vector3.Zero());
+        shaderMaterial.backFaceCulling = false;
+        return shaderMaterial;
+    }
     startEnemyGenerator() {
         this.enemyGenerator.start(this.getEnemyCountCallback);
     }
@@ -293,13 +351,51 @@ export class GameScene {
             console.log("All Enemy is Counted: ");
         }
     }
+    scoringEnemy(enemyType: number) {
+        switch (enemyType) {
+            case ENEMYTYPES.RED.type: {
+                USER.scores += ENEMYTYPES.RED.score;
+                break;
+            }
+            case ENEMYTYPES.GREEN.type: {
+                USER.scores += ENEMYTYPES.GREEN.score;
+                break;
+            }
+            case ENEMYTYPES.BLUE.type: {
+                USER.scores += ENEMYTYPES.BLUE.score;
+                break;
+            }
+        }
+    }
     collideEnemyCallback(enemyData: EnemyData) {
-        GAME.GameApp.Scoreboard.Score = `${enemyData.type}`;
+        // функция вызывается объектом Ball при столкновении с Enemy
         GAME.comboFutures.initCombo(enemyData.type);
+        GAME.GameScene.scoringEnemy(enemyData.type);
+        GAME.GameApp.Scoreboard.Score = `${USER.scores}`;
     }
     comboCallback(comboType: number) {
-        console.log("Combo: ", comboType)
         GAME.GameApp.Scoreboard.Combo = `${comboType}`;
+        let flashNotify: FlashNotifyConmponent;
+        switch (comboType) {
+            case COMBOTYPES.THREE_EQ_SEQ_RED: {
+                flashNotify = new FlashNotifyConmponent(
+                    COMBODESCRIPTION.THREE_EQ_SEQ_RED,
+                    GAME.PlaceGame, { timeLive: 2500, timeout: 1.5 });
+                break;
+            }
+            case COMBOTYPES.THREE_EQ_SEQ_GREEN: {
+                flashNotify = new FlashNotifyConmponent(
+                    COMBODESCRIPTION.THREE_EQ_SEQ_GREEN,
+                    GAME.PlaceGame, { timeLive: 2500, timeout: 1.5 });
+                break;
+            }
+            case COMBOTYPES.THREE_EQ_SEQ_BLUE: {
+                flashNotify = new FlashNotifyConmponent(
+                    COMBODESCRIPTION.THREE_EQ_SEQ_BLUE,
+                    GAME.PlaceGame, { timeLive: 2500, timeout: 1.5 });
+                break;
+            }
+        }
     }
     dispose() {
         this.shield.dispose();

@@ -1,9 +1,10 @@
 import { Tools, UniversalCamera, Vector3 } from "@babylonjs/core";
 import RangeControl from "./rangeControl";
+import { CameraDebugControl } from "@/types/game_types";
 
 export default class CameraControl extends HTMLElement {
     private root: ShadowRoot;
-    private cameraData = {
+    private cameraData:CameraDebugControl = {
         position: new Vector3(0, 0, 0),
         target: new Vector3(0, 0, 0),
         fov: 80,
@@ -37,23 +38,23 @@ export default class CameraControl extends HTMLElement {
         controls.appendChild(trgZ);
         controls.appendChild(fov);
 
-        posY.addEventListener("on-range-event", (e) => {
+        posY.addEventListener("on-range-event", (e:CustomEvent) => {
             this.cameraData.position.y = parseFloat(e.detail.value)
             this.dispatchEvent(cameraDataEvent)
         })
-        posZ.addEventListener("on-range-event", (e) => {
+        posZ.addEventListener("on-range-event", (e: CustomEvent) => {
             this.cameraData.position.z = parseFloat(e.detail.value)
             this.dispatchEvent(cameraDataEvent)
         })
-        trgY.addEventListener("on-range-event", (e) => {
+        trgY.addEventListener("on-range-event", (e: CustomEvent) => {
             this.cameraData.target.y = parseFloat(e.detail.value);
             this.dispatchEvent(cameraDataEvent)
         })
-        trgZ.addEventListener("on-range-event", (e) => {
+        trgZ.addEventListener("on-range-event", (e: CustomEvent) => {
             this.cameraData.target.z = parseFloat(e.detail.value);
             this.dispatchEvent(cameraDataEvent)
         })
-        fov.addEventListener("on-range-event", (e) => {
+        fov.addEventListener("on-range-event", (e: CustomEvent) => {
             this.cameraData.fov = parseFloat(e.detail.value);
             this.dispatchEvent(cameraDataEvent)
         })

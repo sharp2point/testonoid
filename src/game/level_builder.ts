@@ -33,7 +33,7 @@ export class LevelBuilder {
                     const enemy = new Enemy(`enemy-${rnd}-${i}-${j}`, {
                         position: new Vector3(i + this.deltaX, 0.55, j + this.deltaZ).
                             add(new Vector3(-this.deltaMapX, 0, this.deltaMapY)), type: 1
-                    }, this.scene);
+                    }, GAME.Scene);
                     this.enemyNodes.push(enemy);
                 }
 

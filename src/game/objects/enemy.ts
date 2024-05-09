@@ -1,12 +1,14 @@
 import {
-    Animation, Color3, Mesh, Observer,
+    Animation, Color3, Color4, Mesh, MeshBuilder, Observer,
+    ParticleSystem,
     PhysicsAggregate, PhysicsMotionType,
     PhysicsShapeType, Quaternion, Scene,
-    setAndStartTimer, StandardMaterial, Tools,
+    setAndStartTimer, ShaderMaterial, StandardMaterial, Texture, Tools,
     Vector3
 } from "@babylonjs/core";
 import { collideMask, ENEMYTYPES, GAME } from "../../state/global";
 import { EnemyData } from "@/types/game_types";
+import { enemyDeathShader } from "../fx/enemy_death_shader";
 
 export class Enemy {
     private mesh: Mesh;
@@ -21,9 +23,9 @@ export class Enemy {
         return this.enemyData.name;
     }
 
-    constructor(enemyData:EnemyData, scene: Scene) {
+    constructor(enemyData: EnemyData, scene: Scene) {
         this.enemyData = enemyData;
-        
+
         this.scene = scene;
         this.mesh = (scene.getMeshByName('base-enemy-mesh') as Mesh).clone(this.enemyData.name);
         this.mesh.isVisible = true;
@@ -37,7 +39,7 @@ export class Enemy {
         this.aggregate.shape.filterCollideMask = collideMask.groups.enemy;
         this.aggregate.shape.filterMembershipMask = collideMask.enemy;
         //-------------------------------------------------
-        this.animaticMesh = (scene.getMeshByName('base-enemy-mesh') as Mesh).clone(`${name}-animatic`);
+        this.animaticMesh = (scene.getMeshByName('base-enemy-mesh') as Mesh).clone(`${this.enemyData.name}-animatic`);
         this.animaticMesh.isVisible = true;
         this.animaticMesh.position = this.enemyData.position.add(new Vector3(0, 0.1, 0));
         this.animaticMesh.material = (GAME.GameScene.materials.get('enemyMaterial') as StandardMaterial).clone("enemy-animatic-mt");
@@ -54,15 +56,15 @@ export class Enemy {
     }
     typeDifinition(type: number) {
         switch (type) {
-            case ENEMYTYPES.GREEN: {
+            case ENEMYTYPES.GREEN.type: {
                 (this.animaticMesh.material as StandardMaterial).diffuseColor = new Color3(0, 1, 0);
                 break;
             }
-            case ENEMYTYPES.BLUE: {
+            case ENEMYTYPES.BLUE.type: {
                 (this.animaticMesh.material as StandardMaterial).diffuseColor = new Color3(0, 0, 1);
                 break;
             }
-            case ENEMYTYPES.RED: {
+            case ENEMYTYPES.RED.type: {
                 (this.animaticMesh.material as StandardMaterial).diffuseColor = new Color3(1, 0, 0);
                 break;
             }
@@ -95,13 +97,42 @@ export class Enemy {
             contextObservable: this.scene.onBeforeRenderObservable,
             breakCondition: () => { return this.isDeath },
             onEnded: (e) => {
+                this.deathEffect();
                 this.dispose();
+                const timeHandler = setTimeout(() => {
+                    clearTimeout(timeHandler);
+
+                }, 200);
+
             },
             onTick: (e) => { },
             onAborted: (e) => { }
         })
         return this.enemyData;
     }
+    deathEffect() {
+        const psEmitVector = this.animaticMesh.position.clone()
+        const psup = (GAME.GameScene.particles.get("enemy-death-up-ps") as ParticleSystem).
+            clone(`${this.enemyData.name}-death-up-ps`, psEmitVector);
+        psup.start();
+        const psdown = (GAME.GameScene.particles.get("enemy-death-down-ps") as ParticleSystem).
+            clone(`${this.enemyData.name}-death-down-ps`, this.animaticMesh.position.clone());
+        psdown.color2 = Color4.FromColor3((this.animaticMesh.material as StandardMaterial).diffuseColor,1);
+        const dwn_emitter = psdown.createCylinderEmitter(1, 0.1, 1, 0);
+        psdown.start();
+
+        let time = 0.;
+        const handle = GAME.Scene.onBeforeRenderObservable.add(() => {
+            if (time < 5) {
+                psEmitVector.y += 0.1;
+                dwn_emitter.radius += 0.1;
+                time += 0.05;
+            } else {
+                GAME.Scene.onBeforeRenderObservable.remove(handle);
+            }
+        })
+    }
+
     dispose() {
         GAME.enemiesMap.delete(this.enemyData.name);
         if (GAME.enemiesMap.size === 0) {

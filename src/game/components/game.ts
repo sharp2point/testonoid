@@ -23,10 +23,12 @@ export default class GameComponent extends HTMLElement {
         super();
         this.root = this.attachShadow({ mode: 'open' });
         this.root.innerHTML = template();
-        new ScoreboardComponent();
+
     }
     connectedCallback() {
-        this.scoreboard = this.root.querySelector(".scoreboard");
+        this.scoreboard = new ScoreboardComponent(USER.scores);
+        this.scoreboard.setAttribute("class", "scoreboard");
+        this.root.appendChild(this.scoreboard);
 
         this.onMenuEvent = new CustomEvent('on-run-menu', {
             bubbles: false,
@@ -100,13 +102,12 @@ export default class GameComponent extends HTMLElement {
     }
     runDebug() {
         const cameraControl = new CameraControl(GAME.Camera);
-        cameraControl.addEventListener('on-camera-control', (e) => {
+        cameraControl.addEventListener('on-camera-control', (e: CustomEvent) => {
             GAME.Camera.position = e.detail.position;
             GAME.Camera.target = e.detail.target;
             GAME.Camera.fov = Tools.ToRadians(e.detail.fov);
         })
         this.root.appendChild(cameraControl);
-        console.log("RunDebug");
     }
 
 }
@@ -122,8 +123,7 @@ function template() {
             <button class="menu-button" data-target="win">WIN</button>
             <button class="menu-button" data-target="loose">LOOSE</button>
             <button class="menu-button" data-target="debug">Debug</button>
-        </nav>
-        <nice2jam-scoreboard-component class="scoreboard"></nice2jam-scoreboard-component>
+        </nav>       
     `;
     const css = `
         <style>
